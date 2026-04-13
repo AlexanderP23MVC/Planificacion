@@ -5,61 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bienvenido | Sistema de Gestión</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .welcome-section {
-            min-height: 100vh; /* Cambiado a min-height por si la lista es larga */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            padding: 20px 0;
-        }
-        .user-list {
-            text-align: left;
-            max-width: 400px;
-            margin: 20px auto;
-        }
-    </style>
+      @vite(['resources/css/app.css'])
 </head>
 <body>
-
     <div class="welcome-section">
         <div class="container text-center">
             <div class="card shadow-lg p-5 border-0">
                 <div class="card-body">
-                    <h1 class="display-4 fw-bold text-primary mb-3">¡Bienvenido al Sistema!</h1>
-                    <p class="lead text-muted mb-4">
-                        La conexión con **PostgreSQL** se ha establecido correctamente. 
-                        Estás listo para gestionar tus datos de manera segura.
-                    </p>
+                    <h1 class="display-4 fw-bold text-primary mb-3">
+                        <i class="bi bi-shield-lock-fill"></i> Login
+                    </h1>
+                    <p class="lead text-muted mb-4">Sistema de TSJ</p>
                     
+                    <!-- FORMULARIO DE LOGIN -->
+                    <div class="login-form">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label fw-semibold">
+                                    <i class="bi bi-person"></i> Usuario
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-person-circle"></i></span>
+                                    <input type="text" class="form-control" id="username" placeholder="Ej: admin, usuario1" required>
+                                </div>
+                                <div class="invalid-feedback">Por favor ingrese un usuario válido</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label fw-semibold">
+                                    <i class="bi bi-key"></i> Contraseña
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" placeholder="••••••" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2 mt-3">
+                                <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                            </button>
+                        </form>
+                        <div id="errorAlert" class="alert alert-danger mt-3 d-none" role="alert"></div>
+                        <div id="successAlert" class="alert alert-success mt-3 d-none" role="alert"></div>
+                    </div>
+
                     <hr class="my-4">
 
-                    <div class="user-list">
-                        <h5 class="text-secondary mb-3 text-center">Usuarios Registrados:</h5>
-                        <ul class="list-group shadow-sm">
-                            @forelse($usuarios as $user)
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>
-                                        <i class="bi bi-person-circle me-2"></i>
-                                        <strong>Usuario:</strong> {{ $user->user_name }}
-                                    </span>
-                                    <span class="badge bg-info rounded-pill">ID: {{ $user->id_user }}</span>
-                                </li>
-                            @empty
-                                <li class="list-group-item text-center text-muted">No hay usuarios registrados.</li>
-                            @endforelse
-                        </ul>
-                    </div>
+                </div>
 
-                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
-                        <a href="#" class="btn btn-primary btn-lg px-4 gap-3">Ver Inventario</a>
-                        <a href="#" class="btn btn-outline-secondary btn-lg px-4">Configuración</a>
-                    </div>
-                </div>
-                <div class="card-footer bg-transparent border-0 text-muted mt-3">
-                    <small>Usuario conectado con permisos restringidos (ISO 27001)</small>
-                </div>
             </div>
         </div>
     </div>
