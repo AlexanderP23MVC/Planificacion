@@ -20,7 +20,8 @@
                     </h1>
                     
                     <div class="login-form" data-aos="fade-right" data-aos-delay="400">
-                        <form id="loginForm">
+                        <form id="loginForm" method="POST" action="{{ route('login') }}">
+                            @csrf
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">
                                     <i class="bi bi-person"></i> Usuario

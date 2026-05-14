@@ -8,10 +8,10 @@ class Usuario extends Model
 {
     public $timestamps = false;
     protected $table = 'usuario';
-    protected $primaryKey = 'id_user';
+    protected $primaryKey = 'id_usuario';
 
     protected $fillable = [
-        'user_name',
+        'usuario',
 
         // añade aquí los campos de tu tabla
     ];
