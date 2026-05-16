@@ -197,3 +197,17 @@ FROM generate_series(
     '1 day'::interval
 ) AS fecha
 WHERE extract(isodow from fecha) < 6;
+
+
+
+
+ldo que va al readme.md
+
+instalacion de composer
+instalacion de laravel
+ingresar a php.init y descomentarextension=pdo_pgsql
+extension=pdo_sqlite
+extension=pgsql
+generar una nueva APP_KEY=base64 para iniciar laravel en otro equipo
+iniciar con php artisan
+iniciar tambien npm start para las animaciones

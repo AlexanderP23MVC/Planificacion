@@ -8,6 +8,18 @@ class HomeController extends Controller
 {
         public function home()
     {
-        return view('home.home');
+        if (!session('id_usuario')) {
+            
+            return redirect('/')->with('error', 'Debes iniciar sesión primero');
+        }
+
+        $id_usuario = session('id_usuario');
+        $usuario = session('usuario');
+        $departamento = session('departamento');
+        $cargo = session('cargo');
+        $sesiones = session('sesiones');
+        
+         return view('home.home');
     }
+
 }

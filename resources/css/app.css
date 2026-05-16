@@ -1,49 +1,263 @@
+ * {            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
+            margin: 0;
+            padding: 0;
             background: linear-gradient(135deg, #1d61df 0%, #282f55 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
         }
+
+        /* Navbar superior */
+        .navbar {
+
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;            
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            border-radius: 0;
+        }
+
+        /* Contenido principal con espacio para el menú lateral izquierdo */
+        .main-content {
+            padding-top: 70px;
+            padding-left: 320px;  /* Espacio para el menú lateral izquierdo */
+            padding-right: 20px;
+            padding-bottom: 20px;
+            min-height: 100vh;
+        }
+
+        /* Tarjeta centrada */
         .card {
             border-radius: 20px;
             max-width: 500px;
             width: 100%;
-            transition: transform 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .login-form {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-        }
-        .input-group-text {
-            background-color: #e9ecef;
-        }
-        .btn-primary {
-            background: linear-gradient(90deg, #2941c4 0%, #9aa3af 100%);
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             border: none;
         }
-        .btn-primary:hover {
-            background: linear-gradient(90deg, #2941c4 0%, #9aa3af 100%);
-            transform: scale(1.02);
-        }
-        .error-message {
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-        .user-list {
-            max-height: 250px;
+
+        /* Menú lateral izquierdo */
+        .sidebar-left {
+            position: fixed;
+            left: 0;
+            top: 0;                    /* ← Importante: 0, no 70px */
+            width: 280px;
+            height: 100vh;             /* Altura completa */
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
             overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+            z-index: 998;
+            transition: all 0.3s ease;
+
         }
-        .welcome-badge {
-            animation: fadeIn 0.5s ease-in;
+
+        /* Scroll personalizado */
+        .sidebar-left::-webkit-scrollbar {
+            width: 6px;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        .sidebar-left::-webkit-scrollbar-track {
+            background: #2a2a4a;
+        }
+
+        .sidebar-left::-webkit-scrollbar-thumb {
+            background: #4a6fa5;
+            border-radius: 3px;
+        }
+
+        .sidebar-left::-webkit-scrollbar-thumb:hover {
+            background: #6b8cae;
+        }
+
+        /* Header del menú */
+        .sidebar-header {
+            padding: 20px;
+            padding-top: 80px;         /* Espacio para que el contenido no quede debajo del navbar */
+            border-bottom: 1px solid #2a2a4a;
+            text-align: center
+        }
+
+        .sidebar-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-header p {
+            font-size: 0.8rem;
+            color: #8a8aae;
+            margin: 5px 0 0;
+        }
+
+        /* Items del menú */
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            border-bottom: 1px solid #2a2a4a;
+        }
+
+        /* Checkbox oculto para submenús CSS */
+        .submenu-toggle {
+            display: none;
+        }
+
+        /* Label que actúa como botón */
+        .submenu-label {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            gap: 12px;
+        }
+
+        .submenu-label:hover {
+            background: #2a2a4a;
+            color: white;
+            padding-left: 25px;
+        }
+
+        .submenu-label i:first-child {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+
+        .dropdown-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+        }
+
+        /* Enlace sin submenú */
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            gap: 12px;
+        }
+
+        .nav-link-custom:hover {
+            background: #2a2a4a;
+            color: white;
+            padding-left: 25px;
+        }
+
+        .nav-link-custom i {
+            width: 24px;
+            font-size: 1.2rem;
+        }
+
+        /* Submenu oculto */
+        .submenu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            background: #0f0f1a;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        /* Mostrar submenu cuando checkbox está checked */
+        .submenu-toggle:checked ~ .submenu {
+            max-height: 500px;
+        }
+
+        .submenu-toggle:checked ~ .submenu-label .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .submenu li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px 12px 55px;
+            color: #c0c0c0;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .submenu li a:hover {
+            background: #1a1a2e;
+            color: white;
+            padding-left: 60px;
+        }
+
+        .submenu li a i {
+            width: 20px;
+            font-size: 0.9rem;
+        }
+
+        .badge-notif {
+            background: #dc3545;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            margin-left: auto;
+        }
+
+        /* Botón menú móvil */
+        .menu-toggle {
+            position: fixed;
+            left: 20px;
+            bottom: 20px;
+            z-index: 1001;
+            background: #4a6fa5;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+            display: none;
+        }
+
+        .menu-toggle:hover {
+            background: #6b8cae;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                padding-left: 0;
+                padding-right: 0;
+            }
+            
+            .sidebar-left {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar-left.open {
+                transform: translateX(0);
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .sidebar-left {
+                transform: translateX(0);
+            }
         }
