@@ -33,6 +33,39 @@
         }
 
         /* Tarjeta centrada */
+
+        .login-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+                /* Tarjeta de login centrada */
+        .login-card {
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: none;
+        }
+
+        .login-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Resetear los estilos del main-content para login */
+        .login-page .main-content {
+            padding-top: 0;
+            padding-left: 0;
+            padding-right: 0;
+            min-height: auto;
+        }
         .card {
             border-radius: 20px;
             max-width: 500px;
@@ -261,3 +294,164 @@
                 transform: translateX(0);
             }
         }
+
+
+        /* Contenedor de notificaciones */
+.notifications-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Checkbox oculto para controlar el dropdown */
+.notifications-toggle {
+    display: none;
+}
+
+/* Botón de campana */
+.notifications-label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+
+.notifications-label:hover {
+    background: #2a2a4a;
+}
+
+/* Posición relativa para el badge */
+.position-relative {
+    position: relative;
+}
+
+/* Badge de notificaciones */
+.badge-notif-count {
+    position: absolute;
+    top: -5px;
+    right: -10px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 0.65rem;
+    font-weight: bold;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* Menú desplegable de notificaciones */
+.notifications-menu {
+    position: absolute;
+    right: 0;
+    top: 45px;
+    width: 320px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+/* Mostrar menú cuando checkbox está checked */
+.notifications-toggle:checked ~ .notifications-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* Header del menú */
+.notifications-header {
+    padding: 15px;
+    border-bottom: 1px solid #e9ecef;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Lista de notificaciones */
+.notifications-list {
+    max-height: 350px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notifications-list li {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.notifications-list li a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: #333;
+    transition: background 0.2s ease;
+}
+
+.notifications-list li a:hover {
+    background: #f8f9fa;
+}
+
+.notifications-list li a i {
+    font-size: 1.2rem;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.notification-time {
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+/* Footer del menú */
+.notifications-footer {
+    padding: 10px;
+    text-align: center;
+    border-top: 1px solid #e9ecef;
+}
+
+.notifications-footer a {
+    text-decoration: none;
+    color: #4a6fa5;
+    font-size: 0.85rem;
+}
+
+.notifications-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Scroll personalizado */
+.notifications-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.notifications-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+.notifications-list::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 5px;
+}
+
+.notifications-list::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

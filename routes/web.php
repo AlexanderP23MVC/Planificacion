@@ -19,8 +19,19 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/home', [HomeController::class, 'home']);
 
-// Route::middleware(['auth'])->group(function () {
-//     Route::get('/home', [HomeController::class, 'index']);
-//     Route::get('/dashboard', [DashboardController::class, 'index']);
-//     // Más rutas protegidas aquí
-// });
+
+
+
+
+
+
+
+
+//siempre ald final de las rutas
+Route::fallback(function () {
+    // Verificar si hay sesión activa
+    if (session('id_usuario')) {
+        return redirect('/home')->with('error', 'La página que buscas no existe');
+    }
+    return redirect('/')->with('error', 'La página que buscas no existe');
+});
