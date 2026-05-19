@@ -105,41 +105,47 @@
             <p>{{ session('cargo', 'Usuario') }} | {{ session('departamento', 'General') }}</p>
         </div>
         
-        <ul class="nav-menu">
-            <li class="nav-item">
-                <a href="{{ url('/home') }}" class="nav-link-custom">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <input type="checkbox" id="submenuUsuarios" class="submenu-toggle">
-                <label for="submenuUsuarios" class="submenu-label">
-                    <i class="bi bi-people"></i>
-                    <span>Usuarios</span>
-                    <i class="bi bi-chevron-down dropdown-arrow"></i>
-                </label>
-                <ul class="submenu">
-                    <li><a href="#"><i class="bi bi-person-plus"></i> Crear Usuario</a></li>
-                    <li><a href="{{ url('/usuarios') }}"><i class="bi bi-person-badge"></i> Listar Usuarios</a></li>
-                </ul>
-            </li>
-            
-            <li class="nav-item">
-                <a href="{{ url('/departamentos') }}" class="nav-link-custom">
-                    <i class="bi bi-diagram-3"></i>
-                    <span>Departamentos</span>
-                </a>
-            </li>
-            
-            <li class="nav-item">
-                <a href="{{ url('/cargos') }}" class="nav-link-custom">
-                    <i class="bi bi-briefcase"></i>
-                    <span>Cargos</span>
-                </a>
-            </li>
+@php
+    $menus = MenuController::getMenu();
+    
+    // Organizar por menú y submenú (sin unidades ni actividades)
+    $menuOrganizado = [];
+    foreach ($menus as $item) {
+        $menuOrganizado[$item->menu]['submenus'][$item->id_sub_menu] = $item->sub_menu;
+    }
+@endphp
+
+<ul class="nav-menu">
+    <!-- Dashboard fijo -->
+    <li class="nav-item">
+        <a href="{{ url('/home') }}" class="nav-link-custom">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+    
+    <!-- Menús dinámicos desde base de datos -->
+@foreach($menuOrganizado as $nombreMenu => $menuData)
+    <li class="nav-item">
+        <input type="checkbox" id="menu{{ $loop->index }}" class="submenu-toggle">
+        <label for="menu{{ $loop->index }}" class="submenu-label">
+            <i class="bi bi-folder"></i>
+            <span>{{ $nombreMenu }}</span>
+            <i class="bi bi-chevron-down dropdown-arrow"></i>
+        </label>
+        <ul class="submenu">
+           @foreach($menuData['submenus'] as $id_sub_menu => $nombreSub)
+    <li>
+        <a href="{{ route('actividades.submenu', ['submenu_nombre' => $nombreSub, 'id_sub_menu' => $id_sub_menu]) }}">
+            <i class="bi bi-subtract"></i>
+            {{ $nombreSub }}
+        </a>
+    </li>
+@endforeach
         </ul>
+    </li>
+@endforeach
+</ul>
     </div>
 
     <!-- Contenido principal -->

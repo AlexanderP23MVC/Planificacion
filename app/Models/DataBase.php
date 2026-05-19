@@ -41,23 +41,53 @@ class DataBase extends Model
     public static function menu($id_departamento)
         {
             return DB::table('departamento AS dp')
-            ->join('menu AS me', 'dp.id_departamento', '=', 'me.id_departamento')
-            ->join('sub_menu AS sub', 'me.id_menu', '=', 'sub.id_menu')
-            ->join('unidad_actividad AS ua', 'ua.id_sub_menu', '=', 'sub.id_sub_menu')
-            ->join('actividades AS act', 'act.id_unidad_actividad', '=', 'ua.id_unidad_actividad')
-            ->where('dp.id_departamento',$id_departamento)
-            ->select(
-                'dp.id_departamento',
-                'dp.departamento',
-                'me.id_menu',
-                'me.menu',                    
-                'sub.id_sub_menu',
-                'sub.sub_menu',               
-                'ua.id_unidad_actividad',
-                'ua.unidad',                  
-                'act.id_actividades',
-                'act.actividades'             
-            )
-            ->get();
+    ->join('menu AS me', 'me.id_departamento', '=', 'dp.id_departamento')
+    ->join('sub_menu AS sub', 'sub.id_menu', '=', 'me.id_menu')
+    ->join('unidad_sub_menu_actividades AS usa', 'usa.id_sub_menu', '=', 'sub.id_sub_menu')
+    ->join('unidad_actividad AS ua', 'ua.id_unidad_actividad', '=', 'usa.id_unidad_actividad')
+    ->join('actividades AS act', 'act.id_actividades', '=', 'usa.id_actividades')
+    ->where('dp.id_departamento', $id_departamento)
+    ->select(
+        'dp.id_departamento',
+        'dp.departamento',
+        'me.id_menu',
+        'me.menu',
+        'sub.id_sub_menu',
+        'sub.sub_menu',
+        'ua.id_unidad_actividad',
+        'ua.unidad',
+        'act.id_actividades',
+        'act.actividades'
+    )
+    ->get();
         }
+
+        public static function getActividadesBySubMenu($id_sub_menu)
+{
+    return DB::table('departamento AS dp')
+        ->join('menu AS me', 'me.id_departamento', '=', 'dp.id_departamento')
+        ->join('sub_menu AS sub', 'sub.id_menu', '=', 'me.id_menu')
+        ->join('unidad_sub_menu_actividades AS usa', 'usa.id_sub_menu', '=', 'sub.id_sub_menu')
+        ->join('unidad_actividad AS ua', 'ua.id_unidad_actividad', '=', 'usa.id_unidad_actividad')
+        ->join('actividades AS act', 'act.id_actividades', '=', 'usa.id_actividades')
+        ->where('sub.id_sub_menu', $id_sub_menu)
+        ->select(
+            'dp.id_departamento',
+            'dp.departamento',
+            'me.id_menu',
+            'me.menu',
+            'sub.id_sub_menu',
+            'sub.sub_menu',
+            'ua.id_unidad_actividad',
+            'ua.unidad',
+            'act.id_actividades',
+            'act.actividades'
+        )
+        ->get();
+}
+
+
+    
+
+        
 }

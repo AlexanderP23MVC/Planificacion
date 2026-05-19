@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Usuario;
+use App\Models\DataBase;
 class HomeController extends Controller
 {
+
+   
         public function home()
     {
         if (!session('id_usuario')) {
@@ -21,5 +23,21 @@ class HomeController extends Controller
         
          return view('home.home');
     }
+
+
+public function actividades($submenu_nombre, $id_sub_menu)
+{
+    if (!session('id_usuario')) {
+        return redirect('/')->with('error', 'Debes iniciar sesión primero');
+    }
+    
+    $actividades = DataBase::getActividadesBySubMenu($id_sub_menu);
+    return view('sections.actividades', [
+        'actividades' => $actividades,
+        'submenu_nombre' => $submenu_nombre,
+        'id_sub_menu' => $id_sub_menu
+    ]);
+}
+
 
 }
