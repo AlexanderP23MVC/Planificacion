@@ -23,6 +23,10 @@ Route::get('/home', [HomeController::class, 'home']);
 
 Route::get('/{submenu_nombre}/{id_sub_menu}', [HomeController::class, 'actividades'])->name('actividades.submenu');
 
+Route::get('/actividad-especifica/{id_sub_menu}/{nombre}', [HomeController::class, 'actividadEspecifica'])->name('actividad.especifica');
+
+Route::post('/guardar-actividad-especifica', [HomeController::class, 'guardar'])->name('guardar.actividad.especifica');
+
 Route::post('/guardar-registros', [RegistroController::class, 'guardar'])->name('guardar.registros');
 
 //siempre ald final de las rutas

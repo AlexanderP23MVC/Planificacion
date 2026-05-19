@@ -70,6 +70,7 @@ class DataBase extends Model
         ->join('unidad_sub_menu_actividades AS usa', 'usa.id_sub_menu', '=', 'sub.id_sub_menu')
         ->join('unidad_actividad AS ua', 'ua.id_unidad_actividad', '=', 'usa.id_unidad_actividad')
         ->join('actividades AS act', 'act.id_actividades', '=', 'usa.id_actividades')
+        ->join('tipo_actividad AS tp_act', 'tp_act.id_tipo_actividad', '=', 'act.id_tipo_actividad')
         ->where('sub.id_sub_menu', $id_sub_menu)
         ->select(
             'dp.id_departamento',
@@ -81,7 +82,9 @@ class DataBase extends Model
             'ua.id_unidad_actividad',
             'ua.unidad',
             'act.id_actividades',
-            'act.actividades'
+            'act.actividades',
+            'tp_act.id_tipo_actividad',
+            'tp_act.actividad as tipo_actividad'
         )
         ->get();
 }

@@ -108,23 +108,14 @@
 @php
     $menus = MenuController::getMenu();
     
-    // Organizar por menú y submenú (sin unidades ni actividades)
+    // Organizar por menú y submenú
     $menuOrganizado = [];
     foreach ($menus as $item) {
         $menuOrganizado[$item->menu]['submenus'][$item->id_sub_menu] = $item->sub_menu;
     }
 @endphp
 
-<ul class="nav-menu">
-    <!-- Dashboard fijo -->
-    <li class="nav-item">
-        <a href="{{ url('/home') }}" class="nav-link-custom">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
-        </a>
-    </li>
-    
-    <!-- Menús dinámicos desde base de datos -->
+<!-- Menús dinámicos desde base de datos -->
 @foreach($menuOrganizado as $nombreMenu => $menuData)
     <li class="nav-item">
         <input type="checkbox" id="menu{{ $loop->index }}" class="submenu-toggle">
@@ -134,14 +125,25 @@
             <i class="bi bi-chevron-down dropdown-arrow"></i>
         </label>
         <ul class="submenu">
-           @foreach($menuData['submenus'] as $id_sub_menu => $nombreSub)
-    <li>
-        <a href="{{ route('actividades.submenu', ['submenu_nombre' => $nombreSub, 'id_sub_menu' => $id_sub_menu]) }}">
-            <i class="bi bi-subtract"></i>
-            {{ $nombreSub }}
-        </a>
-    </li>
-@endforeach
+            @foreach($menuData['submenus'] as $id_sub_menu => $nombreSub)
+                @php
+                    $actividadesSubmenu = DataBase::getActividadesBySubMenu($id_sub_menu);
+                    $tipoActividad = $actividadesSubmenu->isNotEmpty() ? $actividadesSubmenu->first()->tipo_actividad : 'Actividad Fija';
+                @endphp
+                
+                <li>
+                    @if($tipoActividad == 'Actividad Especifica')
+                        <a href="{{ route('actividad.especifica', ['id_sub_menu' => $id_sub_menu, 'nombre' => $nombreSub]) }}">
+                    {{ str_replace('_', ' ', $nombreSub) }}
+                    
+                </a>
+                    @else
+                        <a href="{{ route('actividades.submenu', ['submenu_nombre' => $nombreSub, 'id_sub_menu' => $id_sub_menu]) }}">
+                        {{ str_replace('_', ' ', $nombreSub) }}
+                        </a>
+                    @endif
+                </li>
+            @endforeach
         </ul>
     </li>
 @endforeach

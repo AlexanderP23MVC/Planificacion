@@ -39,5 +39,19 @@ public function actividades($submenu_nombre, $id_sub_menu)
     ]);
 }
 
+public function actividadEspecifica($id_sub_menu, $nombre)
+    {
+        if (!session('id_usuario')) {
+            return redirect('/')->with('error', 'Debes iniciar sesión primero');
+        }
+        
+        $actividades = DataBase::getActividadesBySubMenu($id_sub_menu);
+        
+        return view('sections.actividadEspecifica', [
+            'actividades' => $actividades,
+            'submenu_nombre' => $nombre,
+            'id_sub_menu' => $id_sub_menu
+        ]);
+    }
 
 }
