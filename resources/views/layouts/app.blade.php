@@ -34,16 +34,20 @@
                             <i class="bi bi-house-fill"></i> Home
                         </a>
                     </li>
+                    @if(session('cargo') == 'Gerente')
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-grid"></i> Módulos
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ url('/usuarios') }}"><i class="bi bi-people"></i> Usuarios</a></li>
-                            <li><a class="dropdown-item" href="{{ url('/departamentos') }}"><i class="bi bi-diagram-3"></i> Departamentos</a></li>
-                            <li><a class="dropdown-item" href="{{ url('/cargos') }}"><i class="bi bi-briefcase"></i> Cargos</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('aprobacion') }}">
+                                    <i class="bi bi-people"></i> Aprobacion
+                                </a>
+                            </li>
                         </ul>
                     </li>
+                    @endif
                 </ul>
                 
                 <ul class="navbar-nav">

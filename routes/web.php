@@ -25,6 +25,21 @@ Route::get('/{submenu_nombre}/{id_sub_menu}', [HomeController::class, 'actividad
 
 Route::get('/actividad-especifica/{id_sub_menu}/{nombre}', [HomeController::class, 'actividadEspecifica'])->name('actividad.especifica');
 
+// Ruta para la API (carga dinámica)
+Route::get('/api/localidades/{id_padre}', [HomeController::class, 'getLocalidades'])->name('api.localidades');
+
+// Ruta para mostrar el formulario
+Route::get('/actividad-especifica/{id_sub_menu}/{nombre}', [HomeController::class, 'actividadEspecifica'])->name('actividad.especifica');
+
+Route::get('/aprobacion', [HomeController::class, 'verAprobacionActividades'])->name('aprobacion');
+
+
+Route::post('/aprobar-actividad', [HomeController::class, 'aprobarActividad'])->name('aprobar.actividad');
+
+Route::post('/rechazar-actividad', [HomeController::class, 'rechazarActividad'])->name('rechazar.actividad');
+
+Route::post('/guardar-actividad-especifica', [HomeController::class, 'guardar'])->name('guardar.actividad.especifica');
+
 Route::post('/guardar-actividad-especifica', [HomeController::class, 'guardar'])->name('guardar.actividad.especifica');
 
 Route::post('/guardar-registros', [RegistroController::class, 'guardar'])->name('guardar.registros');
