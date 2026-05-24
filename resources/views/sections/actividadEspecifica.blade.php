@@ -107,90 +107,74 @@
                 </div>
 
                 <!-- ================= SECCIÓN 1: UBICACIÓN GEOGRÁFICA ================= -->
-                <div class="card border-0 shadow-sm rounded-3 mb-3" id="ubicacionCard">
-                    <div class="card-header bg-info text-white border-0 py-2 px-3 d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold">
-                            <i class="bi bi-geo-alt-fill me-2"></i> Ubicación Geográfica
-                        </h5>
-                        <button type="button" class="btn btn-sm btn-light toggle-btn" onclick="toggleSeccion('ubicacionSection', this)">
-                            <i class="bi bi-pencil-square me-1"></i> Activar
-                        </button>
-                    </div>
-                    <div class="card-body p-3 seccion-contenido" id="ubicacionSection" style="pointer-events: none; opacity: 0.6;">
-                        <!-- País -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold mb-1">
-                                    <i class="bi bi-flag me-1 text-info"></i> País
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light">
-                                        <i class="bi bi-globe2 text-info"></i>
-                                    </span>
-                                    <input type="text" class="form-control bg-white" value="Venezuela" disabled>
-                                    <input type="hidden" name="actividades[{{ $actividad->id_actividades }}][id_pais]" value="1">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold mb-1">
-                                    <i class="bi bi-map me-1 text-info"></i> Estado / Región
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light">
-                                        <i class="bi bi-pin-map-fill text-info"></i>
-                                    </span>
-                                    <select name="actividades[{{ $actividad->id_actividades }}][id_estado]"
-                                        class="form-select select-estado"
-                                        data-actividad="{{ $actividad->id_actividades }}" disabled>
-                                        <option value="">-- Seleccione un Estado --</option>
-                                        @foreach($estados as $estado)
-                                        <option value="{{ $estado->id_localidad }}">{{ $estado->localidad }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold mb-1">
-                                    <i class="bi bi-building me-1 text-info"></i> Municipio
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light">
-                                        <i class="bi bi-building-fill text-info"></i>
-                                    </span>
-                                    <select name="actividades[{{ $actividad->id_actividades }}][id_municipio]"
-                                        class="form-select select-municipio"
-                                        data-actividad="{{ $actividad->id_actividades }}" disabled>
-                                        <option value="">-- Primero seleccione un Estado --</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row mb-2">
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold mb-1">
-                                    <i class="bi bi-pin-map me-1 text-info"></i> Parroquia
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light">
-                                        <i class="bi bi-geo-alt-fill text-info"></i>
-                                    </span>
-                                    <select name="actividades[{{ $actividad->id_actividades }}][id_parroquia]"
-                                        class="form-select select-parroquia"
-                                        data-actividad="{{ $actividad->id_actividades }}" disabled>
-                                        <option value="">-- Primero seleccione un Municipio --</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<!-- ================= SECCIÓN 1: UBICACIÓN GEOGRÁFICA ================= -->
+<div class="card border-0 shadow-sm rounded-3 mb-3" id="ubicacionCard">
+    <div class="card-header bg-info text-white border-0 py-2 px-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold">
+            <i class="bi bi-geo-alt-fill me-2"></i> Ubicación Geográfica
+        </h5>
+        <button type="button" class="btn btn-sm btn-light toggle-btn" onclick="toggleSeccion('ubicacionSection', this)">
+            <i class="bi bi-pencil-square me-1"></i> Activar
+        </button>
+    </div>
+    <div class="card-body p-3 seccion-contenido" id="ubicacionSection" style="pointer-events: none; opacity: 0.6;">
+        <!-- Estado / Región -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label fw-semibold mb-1">
+                    <i class="bi bi-map me-1 text-info"></i> Estado / Región
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-pin-map-fill text-info"></i>
+                    </span>
+                    <select class="form-select select-estado" data-actividad="{{ $actividad->id_actividades }}">
+                        <option value="">-- Seleccione un Estado --</option>
+                        @foreach($estados as $estado)
+                        <option value="{{ $estado->id_localidad }}">{{ $estado->localidad }}</option>
+                        @endforeach
+                    </select>
                 </div>
+            </div>
+        </div>
+
+        <!-- Municipio -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label fw-semibold mb-1">
+                    <i class="bi bi-building me-1 text-info"></i> Municipio
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-building-fill text-info"></i>
+                    </span>
+                    <select class="form-select select-municipio" data-actividad="{{ $actividad->id_actividades }}" disabled>
+                        <option value="">-- Primero seleccione un Estado --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Parroquia -->
+        <div class="row mb-2">
+            <div class="col-md-12">
+                <label class="form-label fw-semibold mb-1">
+                    <i class="bi bi-pin-map me-1 text-info"></i> Parroquia
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light">
+                        <i class="bi bi-geo-alt-fill text-info"></i>
+                    </span>
+                    <select name="actividades[{{ $actividad->id_actividades }}][id_localidad]" 
+                        class="form-select select-parroquia" 
+                        data-actividad="{{ $actividad->id_actividades }}" disabled>
+                        <option value="">-- Primero seleccione un Municipio --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <!-- ================= SECCIÓN 2: PARTICIPANTES ================= -->
                 <div class="card border-0 shadow-sm rounded-3 mb-3" id="participantesCard">

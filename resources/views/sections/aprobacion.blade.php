@@ -77,7 +77,7 @@
                     <td class="text-center">
                         @php
                             $estatusActual = $actividad->estatus ?? 'Pendiente';
-                            $esPendiente = ($estatusActual == 'Pendiente' || $estatusActual == 'pendiente' || $actividad->id_estatus == 1);
+                            $esPendiente = ($estatusActual == 'PENDIENTE');
                             
                             if($esPendiente) {
                                 $badgeClass = 'bg-warning';
@@ -104,13 +104,17 @@
                             <form method="POST" action="{{ route('aprobar.actividad') }}" onsubmit="return confirm('¿Estás seguro de APROBAR esta actividad?')">
                                 @csrf
                                 <input type="hidden" name="id_act_central" value="{{ $actividad->id_act_central }}">
+                                <input type="hidden" name="id_ref_unica" value="{{ $actividad->id_ref_unica }}">
+                                <input type="hidden" name="accion" value="APROBADO">          
                                 <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">
                                     <i class="bi bi-check-lg"></i> Aprobar
                                 </button>
                             </form>
                             <form method="POST" action="{{ route('rechazar.actividad') }}" onsubmit="return confirm('¿Estás seguro de RECHAZAR esta actividad?')">
-                                @csrf
+                                @csrf                        
                                 <input type="hidden" name="id_act_central" value="{{ $actividad->id_act_central }}">
+                                <input type="hidden" name="id_ref_unica" value="{{ $actividad->id_ref_unica }}"> 
+                                <input type="hidden" name="accion" value="RECHAZADO">
                                 <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3">
                                     <i class="bi bi-x-lg"></i> Rechazar
                                 </button>
@@ -147,7 +151,7 @@
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
                 <div class="card-body text-center py-4">
                     <i class="bi bi-check-circle-fill text-white" style="font-size: 2rem;"></i>
-                    <h2 class="display-4 fw-bold text-white mb-0">{{ $actividades->where('estatus', 'Aprobado')->count() }}</h2>
+                    <h2 class="display-4 fw-bold text-white mb-0">{{ $actividades->where('estatus', 'APROBADO')->count() }}</h2>
                     <p class="text-white-50 mb-0">Actividades Aprobadas</p>
                 </div>
             </div>
@@ -156,7 +160,7 @@
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
                 <div class="card-body text-center py-4">
                     <i class="bi bi-clock-history text-white" style="font-size: 2rem;"></i>
-                    <h2 class="display-4 fw-bold text-white mb-0">{{ $actividades->where('estatus', 'Pendiente')->count() }}</h2>
+                    <h2 class="display-4 fw-bold text-white mb-0">{{ $actividades->where('estatus', 'PENDIENTE')->count() }}</h2>
                     <p class="text-white-50 mb-0">Actividades Pendientes</p>
                 </div>
             </div>

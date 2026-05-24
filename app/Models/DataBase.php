@@ -249,10 +249,12 @@ public static function getAprobacionActividades($id_departamento)
         ->join('estatus AS es', 'es.id_estatus', '=', 'rv.id_estatus')
         ->where('dp.id_departamento', $id_departamento)
         ->select(
+            'rv.id_revision',
             'us.id_usuario',
             'us.usuario',
             'dp.id_departamento',
             'dp.departamento',
+            'ref.id_ref_unica',
             'act_cen.nombre_actividad',
             'act_cen.descripcion_actividad',
             'act_cen.id_act_central',
@@ -274,6 +276,28 @@ public static function getAprobacionActividades($id_departamento)
 }
 
 
+        public static function actualizarEstatus($id_ref_unica, $accion)
+        {
+            
+            $estatus = DB::table('estatus')
+                ->where('estatus', $accion)
+                ->first();            
+            
+            if (!$estatus) {
+                return false;
+            }            
+            
+            $id_estatus = $estatus->id_estatus;
+            
+            
+           return DB::table('revision')
+                ->where('id_ref_unica', $id_ref_unica)
+                ->update([
+                    'id_estatus' => $id_estatus,
+                    'id_usuario_revisor' => session('id_usuario'),
+                    'fecha_revision' => now()->toDateString()
+                ]);
+        }
     
 
         

@@ -31,7 +31,7 @@ Route::get('/api/localidades/{id_padre}', [HomeController::class, 'getLocalidade
 // Ruta para mostrar el formulario
 Route::get('/actividad-especifica/{id_sub_menu}/{nombre}', [HomeController::class, 'actividadEspecifica'])->name('actividad.especifica');
 
-Route::get('/aprobacion', [HomeController::class, 'verAprobacionActividades'])->name('aprobacion');
+Route::get('/evaluacionActividad', [HomeController::class, 'verAprobacionActividades'])->name('evaluacionActividad');
 
 
 Route::post('/aprobar-actividad', [HomeController::class, 'aprobarActividad'])->name('aprobar.actividad');

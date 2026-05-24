@@ -96,13 +96,42 @@ public function verAprobacionActividades()
     }
     
     $id_departamento = session('id_departamento');
-    $title_aprobacion = 'Lista de Actividades';
     $actividades = DataBase::getAprobacionActividades($id_departamento);
     
     return view('sections.aprobacion', [
         'actividades' => $actividades,
         'id_departamento' => $id_departamento,
-        'title_aprobacion' => $title_aprobacion
+        
     ]);
 }
+
+public function aprobarActividad(Request $request)
+{
+        if (!session('id_usuario')) {
+        return redirect('/')->with('error', 'Debes iniciar sesión primero');
+    }
+
+    $id_ref_unica = $request->id_ref_unica;
+    $id_act_central = $request->id_act_central;
+    $accion = $request->accion;
+    DataBase::actualizarEstatus($id_ref_unica, $accion);
+    return redirect()->route('evaluacionActividad')->with('success', 'Actividad aprobada correctamente');
+}
+
+
+
+public function rechazarActividad(Request $request)
+{
+
+    if (!session('id_usuario')) {
+        return redirect('/')->with('error', 'Debes iniciar sesión primero');
+    }
+
+    $id_ref_unica = $request->id_ref_unica;
+    $id_act_central = $request->id_act_central;
+    $accion = $request->accion;
+    DataBase::actualizarEstatus($id_ref_unica, $accion);
+    return redirect()->route('evaluacionActividad')->with('error', 'Actividad rechazada');
+}
+
 }

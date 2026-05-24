@@ -41,7 +41,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a class="dropdown-item" href="{{ route('aprobacion') }}">
+                                <a class="dropdown-item" href="{{ route('evaluacionActividad') }}">
                                     <i class="bi bi-people"></i> Aprobacion
                                 </a>
                             </li>
