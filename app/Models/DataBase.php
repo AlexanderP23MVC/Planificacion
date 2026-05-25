@@ -176,7 +176,6 @@ public static function guardarNotificacion($id_ref_unica, $id_usuario, $id_depar
         'id_tipo_perfil_destino' => $id_tipo_perfil,
         'id_departamento_destino' => $id_departamento,
         'id_usuario_emisor' => $id_usuario,
-        'id_estatus_notificacion' => 1, // 1 = Pendiente
         'leido' => false,
         'fecha_notificacion' => date('Y-m-d')
     ];
@@ -237,6 +236,30 @@ public static function guardarActividad($id_usuario, $id_actividad, $datos)
     return $id_ref_unica;
 }
 
+
+// ACTIVIDAD ESPECIFICA
+public static function getMenuActividadesEspecificas()
+{
+    return DB::table('actividades AS act')
+        ->join('tipo_actividad AS tp_act', 'tp_act.id_tipo_actividad', '=', 'act.id_tipo_actividad')
+        ->where('tp_act.actividad', 'Actividad Especifica')
+        ->select(
+            'tp_act.actividad as menu',
+            'act.actividades as sub_menu',
+            'act.id_actividades'
+        )
+        ->get();
+}
+
+public static function getById($id_actividad)
+{
+    return DB::table('actividades')
+        ->where('id_actividades', $id_actividad)
+        ->first();
+}
+
+// ACTIVIDAD FIJA
+
 public static function getAprobacionActividades($id_departamento)
 {
     $resultados = DB::table('usuario AS us')
@@ -275,8 +298,7 @@ public static function getAprobacionActividades($id_departamento)
     return $resultados;
 }
 
-
-        public static function actualizarEstatus($id_ref_unica, $accion)
+    public static function actualizarEstatus($id_ref_unica, $accion)
         {
             
             $estatus = DB::table('estatus')
@@ -288,8 +310,7 @@ public static function getAprobacionActividades($id_departamento)
             }            
             
             $id_estatus = $estatus->id_estatus;
-            
-            
+                        
            return DB::table('revision')
                 ->where('id_ref_unica', $id_ref_unica)
                 ->update([
@@ -298,7 +319,99 @@ public static function getAprobacionActividades($id_departamento)
                     'fecha_revision' => now()->toDateString()
                 ]);
         }
+
+public static function actividadesRechazadas($id_ref_unica, $id_act_central)
+{
+    // Obtener información de la actividad para saber a qué departamento notificar
+    $actividad = DB::table('act_central')
+        ->join('usuario', 'act_central.id_usuario', '=', 'usuario.id_usuario')
+        ->where('act_central.id_act_central', $id_act_central)
+        ->select('usuario.id_departamento')
+        ->first();
     
+    // Crear notificación para el departamento (id_tipo_perfil_destino = 1)
+    if ($actividad) {
+        return self::crearNotificacionDepartamento(
+            $id_ref_unica,
+            1,  // id_tipo_perfil_destino = Departamento
+            $actividad->id_departamento,
+            session('id_usuario')
+        );
+    }
+    
+    return false;
+}
+
+public static function crearNotificacionDepartamento($id_ref_unica, $id_tipo_perfil_destino, $id_departamento_destino, $id_usuario_emisor)
+{
+    return DB::table('notificacion')->insert([
+        'id_ref_unica' => $id_ref_unica,
+        'id_tipo_perfil_destino' => $id_tipo_perfil_destino,
+        'id_departamento_destino' => $id_departamento_destino,
+        'id_usuario_emisor' => $id_usuario_emisor,
+        'leido' => false,
+        'fecha_notificacion' => now()->toDateString()
+    ]);
+}
+
+
+
+
+
+
+
+// Obtener notificaciones según el cargo del usuario
+public static function getNotificaciones($id_departamento, $cargo)
+{
+    // Obtener los IDs de estatus por nombre
+    $pendienteId = DB::table('estatus')->where('estatus', 'PENDIENTE')->value('id_estatus');
+    $rechazadoId = DB::table('estatus')->where('estatus', 'RECHAZADO')->value('id_estatus');
+    
+    $query = DB::table('revision AS rv')
+        ->join('ref_unica AS ref', 'rv.id_ref_unica', '=', 'ref.id_ref_unica')
+        ->join('act_central AS act', 'ref.id_ref_unica', '=', 'act.id_ref_unica')
+        ->join('usuario AS us', 'act.id_usuario', '=', 'us.id_usuario')
+        ->join('estatus AS es', 'rv.id_estatus', '=', 'es.id_estatus')
+        ->where('us.id_departamento', $id_departamento)
+        ->orderBy('rv.fecha_revision', 'desc')
+        ->select(
+            'rv.id_revision',
+            'rv.id_ref_unica',
+            'rv.id_estatus',
+            'rv.fecha_revision',
+            'rv.observaciones',
+            'es.id_estatus',
+            'es.estatus'
+        );
+    
+    if ($cargo == 'Gerente') {
+        // Gerente: solo ve actividades PENDIENTES
+        $query->where('rv.id_estatus', $pendienteId);
+    } else {
+        // Departamento: solo ve actividades RECHAZADAS
+        $query->where('rv.id_estatus', $rechazadoId);
+    }
+    
+    return $query->limit(10)->get();
+}
+
+// Contar notificaciones no leídas (usando leído en revisión)
+public static function contarNotificacionesNoLeidas($id_departamento, $cargo)
+{
+    $query = DB::table('revision AS rv')
+        ->join('ref_unica AS ref', 'rv.id_ref_unica', '=', 'ref.id_ref_unica')
+        ->join('act_central AS act', 'ref.id_ref_unica', '=', 'act.id_ref_unica')
+        ->join('usuario AS us', 'act.id_usuario', '=', 'us.id_usuario')
+        ->where('us.id_departamento', $id_departamento);
+    
+    if ($cargo == 'Gerente') {
+        $query->where('rv.id_estatus', 1);  // Pendientes
+    } else {
+        $query->where('rv.id_estatus', 4);  // Rechazados
+    }
+    
+    return $query->count();
+}
 
         
 }

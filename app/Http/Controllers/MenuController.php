@@ -16,4 +16,9 @@ class MenuController extends Controller
                
         return $menus;
     }
+
+    public static function getMenuActividadesEspecificas()
+{
+    return DataBase::getMenuActividadesEspecificas();
+}
 }

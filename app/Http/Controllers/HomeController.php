@@ -87,6 +87,43 @@ public function getLocalidades($id_padre)
     return redirect()->back()->with('success', 'Registro guardado correctamente');
 }
 
+public function actividadEspecificaById($id_actividad, $nombre)
+{
+    if (!session('id_usuario')) {
+        return redirect('/')->with('error', 'Debes iniciar sesión primero');
+    }
+    
+    // Obtener la actividad específica
+    $actividad = DataBase::getById($id_actividad);
+    
+    // Obtener los estados para el select de ubicación
+    $id_venezuela = 1; // ID de Venezuela
+    $estados = DataBase::localidad($id_venezuela);
+    
+    // Crear un array de actividades para el foreach de la vista
+    $actividades = collect([$actividad]);
+    
+    return view('sections.actividadEspecifica', [
+        'actividades' => $actividades,
+        'submenu_nombre' => $nombre,
+        'id_sub_menu' => null,  // Para actividades específicas no hay sub_menu
+        'estados' => $estados
+    ]);
+}
+
+public static function getMenuActividadesEspecificas()
+{
+    return DB::table('actividades AS act')
+        ->join('tipo_actividad AS tp_act', 'tp_act.id_tipo_actividad', '=', 'act.id_tipo_actividad')
+        ->where('tp_act.actividad', 'Actividad Especifica')
+        ->select(
+            'tp_act.actividad as menu',
+            'act.actividades as sub_menu',
+            'act.id_actividades'
+        )
+        ->get();
+}
+
 
 
 public function verAprobacionActividades()
@@ -122,7 +159,6 @@ public function aprobarActividad(Request $request)
 
 public function rechazarActividad(Request $request)
 {
-
     if (!session('id_usuario')) {
         return redirect('/')->with('error', 'Debes iniciar sesión primero');
     }
@@ -130,8 +166,75 @@ public function rechazarActividad(Request $request)
     $id_ref_unica = $request->id_ref_unica;
     $id_act_central = $request->id_act_central;
     $accion = $request->accion;
+    
+    // Actualizar estatus en la tabla revision
     DataBase::actualizarEstatus($id_ref_unica, $accion);
-    return redirect()->route('evaluacionActividad')->with('error', 'Actividad rechazada');
+    
+    // Crear notificación para el departamento
+    DataBase::actividadesRechazadas($id_ref_unica, $id_act_central);
+    
+    return redirect()->route('evaluacionActividad')->with('error', 'Actividad rechazada. Se ha notificado al departamento.');
 }
+
+
+ // Obtener notificaciones (AJAX)
+    public function obtener()
+{
+    if (!session('id_usuario')) {
+        return response()->json(['error' => 'No autorizado'], 401);
+    }
+    
+    $id_departamento = session('id_departamento');
+    $cargo = session('cargo');
+    
+    $notificaciones = DataBase::getNotificaciones($id_departamento, $cargo);
+    
+    return response()->json($notificaciones);
+}
+    
+    // Obtener contador
+    public function obtenerContador()
+    {
+        if (!session('id_usuario')) {
+            return response()->json(['count' => 0]);
+        }
+        
+        $id_departamento = session('id_departamento');
+        $cargo = session('cargo');
+        
+        $count = DataBase::contarNotificacionesNoLeidas($id_departamento, $cargo);
+        
+        return response()->json(['count' => $count]);
+    }
+    
+    // Marcar notificación como leída (ahora no necesario, pero lo mantenemos)
+    public function marcarComoLeida(Request $request)
+    {
+        // Aquí podrías actualizar una columna "leido" en revision si la agregas
+        return response()->json(['success' => true]);
+    }
+    
+    // Marcar todas como leídas
+    public function marcarTodasComoLeidas(Request $request)
+    {
+        return response()->json(['success' => true]);
+    }
+    
+    // Ver todas las notificaciones
+    public function verTodas()
+    {
+        if (!session('id_usuario')) {
+            return redirect('/')->with('error', 'Debes iniciar sesión primero');
+        }
+        
+        $id_departamento = session('id_departamento');
+        $cargo = session('cargo');
+        
+        $notificaciones = DataBase::getNotificaciones($id_departamento, $cargo);
+        
+        return view('sections.notificaciones', [
+            'notificaciones' => $notificaciones
+        ]);
+    }
 
 }

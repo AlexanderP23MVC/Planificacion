@@ -21,17 +21,14 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::get('/home', [HomeController::class, 'home']);
 
-Route::get('/{submenu_nombre}/{id_sub_menu}', [HomeController::class, 'actividades'])->name('actividades.submenu');
 
-Route::get('/actividad-especifica/{id_sub_menu}/{nombre}', [HomeController::class, 'actividadEspecifica'])->name('actividad.especifica');
+// Rutas para notificaciones
+Route::get('/notificaciones/obtener', [HomeController::class, 'obtener'])->name('notificaciones.obtener');
+Route::post('/notificaciones/marcar-leida', [HomeController::class, 'marcarComoLeida'])->name('notificaciones.marcar.leida');
+Route::post('/notificaciones/marcar-todas-leidas', [HomeController::class, 'marcarTodasComoLeidas'])->name('notificaciones.marcar.todas.leidas');
+Route::get('/notificaciones', [HomeController::class, 'verTodas'])->name('notificaciones.ver.todas');
+Route::get('/notificaciones/contador', [HomeController::class, 'obtenerContador'])->name('notificaciones.contador');
 
-// Ruta para la API (carga dinámica)
-Route::get('/api/localidades/{id_padre}', [HomeController::class, 'getLocalidades'])->name('api.localidades');
-
-// Ruta para mostrar el formulario
-Route::get('/actividad-especifica/{id_sub_menu}/{nombre}', [HomeController::class, 'actividadEspecifica'])->name('actividad.especifica');
-
-Route::get('/evaluacionActividad', [HomeController::class, 'verAprobacionActividades'])->name('evaluacionActividad');
 
 
 Route::post('/aprobar-actividad', [HomeController::class, 'aprobarActividad'])->name('aprobar.actividad');
@@ -43,6 +40,24 @@ Route::post('/guardar-actividad-especifica', [HomeController::class, 'guardar'])
 Route::post('/guardar-actividad-especifica', [HomeController::class, 'guardar'])->name('guardar.actividad.especifica');
 
 Route::post('/guardar-registros', [RegistroController::class, 'guardar'])->name('guardar.registros');
+
+
+// Rutas dinamicas deben estar de ultima
+Route::get('/actividad-especifica-actividad/{id_actividad}/{nombre}', [HomeController::class, 'actividadEspecificaById'])->name('actividad.especifica.actividad');
+Route::get('/{submenu_nombre}/{id_sub_menu}', [HomeController::class, 'actividades'])->name('actividades.submenu');
+
+Route::get('/actividad-especifica/{id_sub_menu}/{nombre}', [HomeController::class, 'actividadEspecifica'])->name('actividad.especifica');
+
+Route::get('/api/localidades/{id_padre}', [HomeController::class, 'getLocalidades'])->name('api.localidades');
+
+Route::get('/actividad-especifica/{id_sub_menu}/{nombre}', [HomeController::class, 'actividadEspecifica'])->name('actividad.especifica');
+
+Route::get('/evaluacionActividad', [HomeController::class, 'verAprobacionActividades'])->name('evaluacionActividad');
+
+
+
+
+
 
 //siempre ald final de las rutas
 Route::fallback(function () {
