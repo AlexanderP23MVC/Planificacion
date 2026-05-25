@@ -33,6 +33,8 @@ Route::get('/notificaciones/contador', [HomeController::class, 'obtenerContador'
 
 Route::post('/aprobar-actividad', [HomeController::class, 'aprobarActividad'])->name('aprobar.actividad');
 
+Route::post('/acertificar-actividad', [HomeController::class, 'certificarActividad'])->name('certificar.actividad');
+
 Route::post('/rechazar-actividad', [HomeController::class, 'rechazarActividad'])->name('rechazar.actividad');
 
 Route::post('/guardar-actividad-especifica', [HomeController::class, 'guardar'])->name('guardar.actividad.especifica');
@@ -40,6 +42,11 @@ Route::post('/guardar-actividad-especifica', [HomeController::class, 'guardar'])
 Route::post('/guardar-actividad-especifica', [HomeController::class, 'guardar'])->name('guardar.actividad.especifica');
 
 Route::post('/guardar-registros', [RegistroController::class, 'guardar'])->name('guardar.registros');
+
+
+// Rutas de planificiacion
+Route::get('planificacion/{submenu_nombre}/{id_sub_menu}', [HomeController::class, 'planificacionActividad'])->name('planificacion.actividad');
+
 
 
 // Rutas dinamicas deben estar de ultima

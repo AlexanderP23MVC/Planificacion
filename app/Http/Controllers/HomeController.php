@@ -132,13 +132,25 @@ public function verAprobacionActividades()
         return redirect('/')->with('error', 'Debes iniciar sesión primero');
     }
     
+    $cargo = session('cargo');
+    $departamento_nombre = session('departamento', '');
     $id_departamento = session('id_departamento');
-    $actividades = DataBase::getAprobacionActividades($id_departamento);
+    
+    // Validar acceso: solo Gerente o Planificación
+    $esGerente = ($cargo == 'Gerente');
+    $esPlanificacion = (strtolower($departamento_nombre) == 'planificacion');
+    
+    if (!$esGerente && !$esPlanificacion) {
+        return redirect('/home')->with('error', 'No tienes permiso para acceder a esta sección');
+    }
+    
+    // Usar paginación (15 registros por página)
+    $actividades = DataBase::getAprobacionActividades($id_departamento, $cargo, $departamento_nombre)
+        ->paginate(15);
     
     return view('sections.aprobacion', [
         'actividades' => $actividades,
-        'id_departamento' => $id_departamento,
-        
+        'id_departamento' => $id_departamento
     ]);
 }
 
@@ -155,6 +167,20 @@ public function aprobarActividad(Request $request)
     return redirect()->route('evaluacionActividad')->with('success', 'Actividad aprobada correctamente');
 }
 
+public function certificarActividad(Request $request)
+{
+    if (!session('id_usuario')) {
+        return redirect('/')->with('error', 'Debes iniciar sesión primero');
+    }
+    
+    $id_ref_unica = $request->id_ref_unica;
+    $accion = $request->accion; // CERTIFICADO
+    
+    // Actualizar estatus a CERTIFICADO (id_estatus = 5)
+    DataBase::actualizarEstatus($id_ref_unica, $accion);
+    
+    return redirect()->back()->with('success', 'Actividad certificada correctamente');
+}
 
 
 public function rechazarActividad(Request $request)
@@ -177,8 +203,24 @@ public function rechazarActividad(Request $request)
 }
 
 
- // Obtener notificaciones (AJAX)
-    public function obtener()
+// Obtener contador de notificaciones
+public function obtenerContador()
+{
+    if (!session('id_usuario')) {
+        return response()->json(['count' => 0]);
+    }
+    
+    $cargo = session('cargo');
+    $departamento_nombre = session('departamento', '');
+    $id_departamento = session('id_departamento');
+    
+    $count = DataBase::contarNotificacionesNoLeidas($id_departamento, $cargo, $departamento_nombre);
+    
+    return response()->json(['count' => $count]);
+}
+
+// Obtener notificaciones (AJAX)
+public function obtener()
 {
     if (!session('id_usuario')) {
         return response()->json(['error' => 'No autorizado'], 401);
@@ -186,55 +228,76 @@ public function rechazarActividad(Request $request)
     
     $id_departamento = session('id_departamento');
     $cargo = session('cargo');
+    $departamento_nombre = session('departamento', '');
     
-    $notificaciones = DataBase::getNotificaciones($id_departamento, $cargo);
+    $notificaciones = DataBase::getNotificaciones($id_departamento, $cargo, $departamento_nombre);
     
     return response()->json($notificaciones);
 }
-    
-    // Obtener contador
-    public function obtenerContador()
-    {
-        if (!session('id_usuario')) {
-            return response()->json(['count' => 0]);
-        }
-        
-        $id_departamento = session('id_departamento');
-        $cargo = session('cargo');
-        
-        $count = DataBase::contarNotificacionesNoLeidas($id_departamento, $cargo);
-        
-        return response()->json(['count' => $count]);
+
+// Marcar una notificación como leída (ahora solo es un placeholder)
+public function marcarComoLeida(Request $request)
+{
+    // No es necesario actualizar nada porque no hay columna "leido"
+    return response()->json(['success' => true]);
+}
+
+// Marcar todas como leídas (placeholder)
+public function marcarTodasComoLeidas(Request $request)
+{
+    return response()->json(['success' => true]);
+}
+
+// Ver todas las notificaciones
+public function verTodas()
+{
+    if (!session('id_usuario')) {
+        return redirect('/')->with('error', 'Debes iniciar sesión primero');
     }
     
-    // Marcar notificación como leída (ahora no necesario, pero lo mantenemos)
-    public function marcarComoLeida(Request $request)
-    {
-        // Aquí podrías actualizar una columna "leido" en revision si la agregas
-        return response()->json(['success' => true]);
+    $id_departamento = session('id_departamento');
+    $cargo = session('cargo');
+    $departamento_nombre = session('departamento', '');
+    
+    $notificaciones = DataBase::getNotificaciones($id_departamento, $cargo, $departamento_nombre);
+    
+    return view('sections.notificaciones', [
+        'notificaciones' => $notificaciones
+    ]);
+}
+
+
+    //controller para planificacion
+
+public function planificacionActividad($submenu_nombre, $id_sub_menu)
+{
+    if (!session('id_usuario')) {
+        return redirect('/')->with('error', 'Debes iniciar sesión primero');
     }
     
-    // Marcar todas como leídas
-    public function marcarTodasComoLeidas(Request $request)
-    {
-        return response()->json(['success' => true]);
+    $actividades = DataBase::getActividadesBySubMenu($id_sub_menu);
+
+
+    // Determinar qué vista mostrar según el submenu_nombre
+    switch($submenu_nombre) {
+        case 'certificacion_actividad':
+            $vista = 'sections.planificacion.certificacionActividad';
+            break;
+        case 'reporte_semanal':
+            $vista = 'sections.planificacion.reporte_semanal';
+            break;
+        case 'configuracion':
+            $vista = 'sections.planificacion.configuracion';
+            break;
+        default:
+            $vista = 'sections.planificacionActividad';
+            break;
     }
-    
-    // Ver todas las notificaciones
-    public function verTodas()
-    {
-        if (!session('id_usuario')) {
-            return redirect('/')->with('error', 'Debes iniciar sesión primero');
-        }
-        
-        $id_departamento = session('id_departamento');
-        $cargo = session('cargo');
-        
-        $notificaciones = DataBase::getNotificaciones($id_departamento, $cargo);
-        
-        return view('sections.notificaciones', [
-            'notificaciones' => $notificaciones
-        ]);
-    }
+
+    return view($vista, [
+        'submenu_nombre' => $submenu_nombre,
+        'id_sub_menu' => $id_sub_menu
+    ]);
+}
 
 }

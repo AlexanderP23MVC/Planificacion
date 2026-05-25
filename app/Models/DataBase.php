@@ -260,9 +260,12 @@ public static function getById($id_actividad)
 
 // ACTIVIDAD FIJA
 
-public static function getAprobacionActividades($id_departamento)
+public static function getAprobacionActividades($id_departamento, $cargo, $departamento_nombre = null)
 {
-    $resultados = DB::table('usuario AS us')
+    $esGerente = ($cargo == 'Gerente');
+    $esPlanificacion = (strtolower($departamento_nombre) == 'planificacion');
+    
+    $query = DB::table('usuario AS us')
         ->join('departamento AS dp', 'us.id_departamento', '=', 'dp.id_departamento')
         ->join('act_central AS act_cen', 'act_cen.id_usuario', '=', 'us.id_usuario')
         ->join('actividades AS act', 'act.id_actividades', '=', 'act_cen.id_actividades')
@@ -270,7 +273,6 @@ public static function getAprobacionActividades($id_departamento)
         ->join('ref_unica AS ref', 'ref.id_ref_unica', '=', 'act_cen.id_ref_unica')
         ->join('revision AS rv', 'rv.id_ref_unica', '=', 'ref.id_ref_unica')
         ->join('estatus AS es', 'es.id_estatus', '=', 'rv.id_estatus')
-        ->where('dp.id_departamento', $id_departamento)
         ->select(
             'rv.id_revision',
             'us.id_usuario',
@@ -292,10 +294,17 @@ public static function getAprobacionActividades($id_departamento)
             'rv.id_estatus',
             'es.id_estatus as estatus_id',
             'es.estatus'
-        )
-        ->get();
+        );
     
-    return $resultados;
+    if ($esGerente) {
+        $query->where('dp.id_departamento', $id_departamento);
+    } elseif ($esPlanificacion) {
+        $query->where('es.estatus', 'APROBADO'); // Solo aprobados
+    } else {
+        $query->where('dp.id_departamento', 0); // No resultados
+    }
+    
+    return $query->orderBy('act_cen.fecha_registro', 'desc');
 }
 
     public static function actualizarEstatus($id_ref_unica, $accion)
@@ -361,56 +370,79 @@ public static function crearNotificacionDepartamento($id_ref_unica, $id_tipo_per
 
 
 // Obtener notificaciones según el cargo del usuario
-public static function getNotificaciones($id_departamento, $cargo)
+public static function obtenerNotificacion()
 {
-    // Obtener los IDs de estatus por nombre
-    $pendienteId = DB::table('estatus')->where('estatus', 'PENDIENTE')->value('id_estatus');
-    $rechazadoId = DB::table('estatus')->where('estatus', 'RECHAZADO')->value('id_estatus');
+    return DB::table('notificacion');
+}
+
+public static function getNotificaciones($id_departamento, $cargo, $departamento_nombre = null)
+{
+    $esGerente = ($cargo == 'Gerente');
+    $esPlanificacion = (strtolower($departamento_nombre) == 'planificacion');
     
     $query = DB::table('revision AS rv')
         ->join('ref_unica AS ref', 'rv.id_ref_unica', '=', 'ref.id_ref_unica')
         ->join('act_central AS act', 'ref.id_ref_unica', '=', 'act.id_ref_unica')
         ->join('usuario AS us', 'act.id_usuario', '=', 'us.id_usuario')
+        ->join('actividades AS actv', 'act.id_actividades', '=', 'actv.id_actividades')
         ->join('estatus AS es', 'rv.id_estatus', '=', 'es.id_estatus')
-        ->where('us.id_departamento', $id_departamento)
-        ->orderBy('rv.fecha_revision', 'desc')
         ->select(
-            'rv.id_revision',
+            'rv.id_revision as id_notificacion',
             'rv.id_ref_unica',
             'rv.id_estatus',
-            'rv.fecha_revision',
-            'rv.observaciones',
-            'es.id_estatus',
+            'rv.fecha_revision as fecha_notificacion',
+            'us.usuario',
+            'us.id_departamento',
+            'actv.actividades',
             'es.estatus'
         );
     
-    if ($cargo == 'Gerente') {
-        // Gerente: solo ve actividades PENDIENTES
-        $query->where('rv.id_estatus', $pendienteId);
-    } else {
-        // Departamento: solo ve actividades RECHAZADAS
-        $query->where('rv.id_estatus', $rechazadoId);
+    if ($esGerente) {
+        // Gerente: ve actividades PENDIENTES de su departamento
+        $query->where('us.id_departamento', $id_departamento)
+              ->where('rv.id_estatus', 1);
+    } 
+    elseif ($esPlanificacion) {
+        // Planificación: ve actividades APROBADAS de todos los departamentos
+        $query->where('rv.id_estatus', 2);
+    } 
+    else {
+        return collect();
     }
     
-    return $query->limit(10)->get();
+    return $query->orderBy('rv.fecha_revision', 'desc')->get();
 }
 
-// Contar notificaciones no leídas (usando leído en revisión)
-public static function contarNotificacionesNoLeidas($id_departamento, $cargo)
+// Contar notificaciones no leídas
+public static function contarNotificacionesNoLeidas($id_departamento, $cargo, $departamento_nombre = null)
 {
+    $esGerente = ($cargo == 'Gerente');
+    $esPlanificacion = (strtolower($departamento_nombre) == 'planificacion');
+    
     $query = DB::table('revision AS rv')
         ->join('ref_unica AS ref', 'rv.id_ref_unica', '=', 'ref.id_ref_unica')
         ->join('act_central AS act', 'ref.id_ref_unica', '=', 'act.id_ref_unica')
-        ->join('usuario AS us', 'act.id_usuario', '=', 'us.id_usuario')
-        ->where('us.id_departamento', $id_departamento);
+        ->join('usuario AS us', 'act.id_usuario', '=', 'us.id_usuario');
     
-    if ($cargo == 'Gerente') {
-        $query->where('rv.id_estatus', 1);  // Pendientes
-    } else {
-        $query->where('rv.id_estatus', 4);  // Rechazados
+    if ($esGerente) {
+        $query->where('us.id_departamento', $id_departamento)
+              ->where('rv.id_estatus', 1);
+    } 
+    elseif ($esPlanificacion) {
+        $query->where('rv.id_estatus', 2);
+    } 
+    else {
+        return 0;
     }
     
     return $query->count();
+}
+
+public static function marcarNotificacionComoLeida($id_notificacion)
+{
+    return DB::table('notificacion')
+        ->where('id_notificacion', $id_notificacion)
+        ->update(['leido' => true]);
 }
 
         

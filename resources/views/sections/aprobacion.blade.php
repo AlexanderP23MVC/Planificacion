@@ -38,26 +38,32 @@
             <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <tr>
                     <th class="text-white py-3 text-center" style="border-top-left-radius: 1rem; width: 5%;">#</th>
-                    <th class="text-white py-3" style="width: 25%;">Actividad</th>
-                    <th class="text-white py-3 text-center" style="width: 12%;">Usuario</th>
-                    <th class="text-white py-3 text-center" style="width: 12%;">Fecha Registro</th>
-                    <th class="text-white py-3 text-center" style="width: 12%;">Participantes</th>
+                    <th class="text-white py-3" style="width: 20%;">Actividad</th>
+                    <th class="text-white py-3 text-center" style="width: 10%;">Usuario</th>
+                    <th class="text-white py-3 text-center" style="width: 10%;">Departamento</th>
+                    <th class="text-white py-3 text-center" style="width: 10%;">Fecha Registro</th>
+                    <th class="text-white py-3 text-center" style="width: 10%;">Participantes</th>
                     <th class="text-white py-3 text-center" style="width: 8%;">Duración</th>
-                    <th class="text-white py-3 text-center" style="width: 12%;">Estatus</th>
-                    <th class="text-white py-3 text-center" style="border-top-right-radius: 1rem; width: 14%;">Acciones</th>
+                    <th class="text-white py-3 text-center" style="width: 10%;">Estatus</th>
+                    <th class="text-white py-3 text-center" style="border-top-right-radius: 1rem; width: 12%;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($actividades as $index => $actividad)
                 <tr style="background: white; border-bottom: 1px solid #f0f0f0;">
-                    <td class="text-center fw-bold text-muted">{{ $index + 1 }}</td>
+                    <td class="text-center fw-bold text-muted">{{ ($actividades->currentPage() - 1) * $actividades->perPage() + $index + 1 }}</td>
                     <td>
                         <div class="d-flex flex-column">
                             <strong class="text-primary">{{ $actividad->nombre_actividad ?? 'Sin nombre' }}</strong>
-                            <small class="text-muted">{{ Str::limit($actividad->descripcion_actividad ?? 'Sin descripción', 60) }}</small>
+                            <small class="text-muted">{{ Str::limit($actividad->descripcion_actividad ?? 'Sin descripción', 50) }}</small>
                         </div>
                     </td>
                     <td class="text-center">{{ $actividad->usuario ?? 'N/A' }}</td>
+                    <td class="text-center">
+                        <span class="badge bg-secondary rounded-pill px-3 py-2">
+                            <i class="bi bi-building me-1"></i> {{ $actividad->departamento ?? 'N/A' }}
+                        </span>
+                    </td>
                     <td class="text-center">{{ \Carbon\Carbon::parse($actividad->fecha_registro)->format('d/m/Y') }}</td>
                     <td class="text-center">
                         <span class="badge bg-primary rounded-pill px-3 py-2">
@@ -77,16 +83,22 @@
                     <td class="text-center">
                         @php
                             $estatusActual = $actividad->estatus ?? 'Pendiente';
-                            $esPendiente = ($estatusActual == 'PENDIENTE');
+                            $esPendiente = ($estatusActual == 'PENDIENTE' || $actividad->id_estatus == 1);
+                            $esAprobado = ($estatusActual == 'APROBADO' || $actividad->id_estatus == 2);
+                            $esCertificado = ($estatusActual == 'CERTIFICADO' || $actividad->id_estatus == 5);
                             
                             if($esPendiente) {
                                 $badgeClass = 'bg-warning';
                                 $badgeIcon = 'bi-clock-history';
                                 $estatusTexto = 'Pendiente';
-                            } elseif($estatusActual == 'Aprobado' || $actividad->id_estatus == 2) {
+                            } elseif($esAprobado) {
                                 $badgeClass = 'bg-success';
                                 $badgeIcon = 'bi-check-circle-fill';
                                 $estatusTexto = 'Aprobado';
+                            } elseif($esCertificado) {
+                                $badgeClass = 'bg-info';
+                                $badgeIcon = 'bi-award-fill';
+                                $estatusTexto = 'Certificado';
                             } else {
                                 $badgeClass = 'bg-danger';
                                 $badgeIcon = 'bi-x-circle-fill';
@@ -99,7 +111,11 @@
                         </span>
                     </td>
                     <td class="text-center">
-                        @if($esPendiente)
+                        @php
+                            $esPlanificacion = (strtolower(session('departamento', '')) == 'planificacion');
+                        @endphp
+                        
+                        @if($esPendiente && !$esPlanificacion)
                         <div class="d-flex gap-2 justify-content-center">
                             <form method="POST" action="{{ route('aprobar.actividad') }}" onsubmit="return confirm('¿Estás seguro de APROBAR esta actividad?')">
                                 @csrf
@@ -120,13 +136,38 @@
                                 </button>
                             </form>
                         </div>
-                        @elseif($estatusActual == 'Aprobado' || $actividad->id_estatus == 2)
+                        @elseif($esAprobado && $esPlanificacion)
+                        <div class="d-flex gap-2 justify-content-center">
+                            <form method="POST" action="{{ route('certificar.actividad') }}" onsubmit="return confirm('¿Estás seguro de CERTIFICAR esta actividad?')">
+                                @csrf
+                                <input type="hidden" name="id_act_central" value="{{ $actividad->id_act_central }}">
+                                <input type="hidden" name="id_ref_unica" value="{{ $actividad->id_ref_unica }}">
+                                <input type="hidden" name="accion" value="CERTIFICADO">
+                                <button type="submit" class="btn btn-info btn-sm rounded-pill px-3">
+                                    <i class="bi bi-award-fill"></i> Certificar
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ route('rechazar.actividad') }}" onsubmit="return confirm('¿Estás seguro de RECHAZAR esta actividad?')">
+                                @csrf                        
+                                <input type="hidden" name="id_act_central" value="{{ $actividad->id_act_central }}">
+                                <input type="hidden" name="id_ref_unica" value="{{ $actividad->id_ref_unica }}"> 
+                                <input type="hidden" name="accion" value="RECHAZADO">
+                                <button type="submit" class="btn btn-danger btn-sm rounded-pill px-3">
+                                    <i class="bi bi-x-lg"></i> Rechazar
+                                </button>
+                            </form>
+                        </div>
+                        @elseif($esAprobado)
                         <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-3 py-2">
-                            <i class="bi bi-check-circle-fill me-1"></i> Ya aprobada
+                            <i class="bi bi-check-circle-fill me-1"></i> En espera de certificación
+                        </span>
+                        @elseif($esCertificado)
+                        <span class="badge bg-info bg-opacity-25 text-info rounded-pill px-3 py-2">
+                            <i class="bi bi-award-fill me-1"></i> Certificada
                         </span>
                         @else
                         <span class="badge bg-danger bg-opacity-25 text-danger rounded-pill px-3 py-2">
-                            <i class="bi bi-x-circle-fill me-1"></i> Ya rechazada
+                            <i class="bi bi-x-circle-fill me-1"></i> Rechazada
                         </span>
                         @endif
                     </td>
@@ -136,13 +177,18 @@
         </table>
     </div>
     
+    <!-- PAGINACIÓN -->
+    <div class="d-flex justify-content-center mt-4">
+        {{ $actividades->links('pagination::bootstrap-5') }}
+    </div>
+    
     <!-- Resumen de actividades -->
     <div class="row mt-5 g-4">
         <div class="col-md-4">
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                 <div class="card-body text-center py-4">
                     <i class="bi bi-calendar-check text-white" style="font-size: 2rem;"></i>
-                    <h2 class="display-4 fw-bold text-white mb-0">{{ $actividades->count() }}</h2>
+                    <h2 class="display-4 fw-bold text-white mb-0">{{ $actividades->total() }}</h2>
                     <p class="text-white-50 mb-0">Total Actividades</p>
                 </div>
             </div>

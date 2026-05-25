@@ -34,7 +34,8 @@ use App\Models\DataBase;
                             <i class="bi bi-house-fill"></i> Home
                         </a>
                     </li>
-                    @if(session('cargo') == 'Gerente')
+                    
+                    @if(session('cargo') == 'Gerente' || session('departamento') == 'Planificacion')
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
                             <i class="bi bi-grid"></i> Módulos
@@ -156,11 +157,19 @@ use App\Models\DataBase;
                     $actividadesSubmenu = DataBase::getActividadesBySubMenu($id_sub_menu);
                     $tipoActividad = $actividadesSubmenu->isNotEmpty() ? $actividadesSubmenu->first()->tipo_actividad :
                     'Actividad Fija';
+                    $departamento = session('departamento', '');
                     @endphp
+
                     <li>
                         @if($tipoActividad == 'Actividad Especifica')
                         <a
                             href="{{ route('actividad.especifica', ['id_sub_menu' => $id_sub_menu, 'nombre' => $nombreSub]) }}">
+                            {{ str_replace('_', ' ', $nombreSub) }}
+                        </a>
+                        @elseif(strtolower($departamento) == 'planificacion')
+                        <a
+                            href="{{ route('planificacion.actividad', ['submenu_nombre' => $nombreSub, 'id_sub_menu' => $id_sub_menu]) }}">
+                            <i class="bi bi-calendar-week me-1"></i>
                             {{ str_replace('_', ' ', $nombreSub) }}
                         </a>
                         @else
@@ -187,7 +196,8 @@ use App\Models\DataBase;
                 <ul class="submenu">
                     @foreach($menuData['submenus'] as $id_actividad => $nombreSub)
                     <li>
-                        <a href="{{ route('actividad.especifica.actividad', ['id_actividad' => $id_actividad, 'nombre' => $nombreSub]) }}">
+                        <a
+                            href="{{ route('actividad.especifica.actividad', ['id_actividad' => $id_actividad, 'nombre' => $nombreSub]) }}">
                             {{ str_replace('_', ' ', $nombreSub) }}
                         </a>
                     </li>
@@ -219,119 +229,99 @@ use App\Models\DataBase;
         const diffMin = Math.floor(diffMs / 60000);
         const diffHoras = Math.floor(diffMin / 60);
         const diffDias = Math.floor(diffHoras / 24);
-
+        
         if (diffMin < 1) return 'Hace unos segundos';
         if (diffMin < 60) return `Hace ${diffMin} min`;
         if (diffHoras < 24) return `Hace ${diffHoras} horas`;
         return `Hace ${diffDias} días`;
     }
-
+    
+    // Actualizar contador del badge
+    function actualizarContador() {
+        fetch('{{ route("notificaciones.contador") }}')
+            .then(response => response.json())
+            .then(data => {
+                const countBadge = document.getElementById('notificacionesCount');
+                if (countBadge) {
+                    const count = data.count || 0;
+                    countBadge.textContent = count;
+                    countBadge.style.display = count === 0 ? 'none' : 'inline-block';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+    
     // Cargar notificaciones
     function cargarNotificaciones() {
-        console.log('Cargando notificaciones...');
-
         fetch('{{ route("notificaciones.obtener") }}')
             .then(response => response.json())
             .then(data => {
-                console.log('Notificaciones recibidas:', data);
                 const count = data.length;
                 const notificacionesList = document.getElementById('notificacionesList');
                 const countBadge = document.getElementById('notificacionesCount');
-
-                // Actualizar contador
-                if (countBadge) countBadge.textContent = count;
-
+                
+                // Actualizar badge
+                if (countBadge) {
+                    countBadge.textContent = count;
+                    countBadge.style.display = count === 0 ? 'none' : 'inline-block';
+                }
+                
                 if (!notificacionesList) return;
-
+                
                 if (count === 0) {
                     notificacionesList.innerHTML = '<li class="text-center text-muted py-3"><i class="bi bi-inbox"></i> No hay notificaciones</li>';
                     return;
                 }
-
+                
                 let html = '';
                 data.forEach(notif => {
                     const tiempo = tiempoRelativo(notif.fecha_notificacion);
+                    let mensaje = '';
+                    let icono = '';
+                    
+                    if (notif.id_estatus == 1) {
+                        mensaje = `📋 Actividad pendiente de aprobación: ${notif.actividades}`;
+                        icono = 'bi-clock-history text-warning';
+                    } else if (notif.id_estatus == 2) {
+                        mensaje = `✅ Actividad aprobada para certificar: ${notif.actividades}`;
+                        icono = 'bi-check-circle-fill text-success';
+                    } else {
+                        mensaje = `📌 Actividad: ${notif.actividades}`;
+                        icono = 'bi-bell-fill text-primary';
+                    }
+                    
                     html += `
                         <li>
-                            <a href="#" onclick="marcarComoLeida(${notif.id_notificacion})">
-                                <i class="bi bi-bell-fill text-warning"></i>
+                            <a href="#">
+                                <i class="bi ${icono}"></i>
                                 <div>
-                                    <div class="notification-title">Actividad pendiente de revisión</div>
+                                    <div class="notification-title">${mensaje}</div>
                                     <div class="notification-time">${tiempo}</div>
                                 </div>
-                                <span class="badge bg-danger ms-2">Nueva</span>
                             </a>
                         </li>
                     `;
                 });
-
+                
                 notificacionesList.innerHTML = html;
             })
             .catch(error => {
-                console.error('Error al cargar notificaciones:', error);
+                console.error('Error:', error);
                 const notificacionesList = document.getElementById('notificacionesList');
                 if (notificacionesList) {
                     notificacionesList.innerHTML = '<li class="text-center text-danger py-3">Error al cargar notificaciones</li>';
                 }
             });
     }
-
-    // Marcar una notificación como leída
-    function marcarComoLeida(id) {
-        fetch('{{ route("notificaciones.marcar.leida") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            body: JSON.stringify({ id_notificacion: id })
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    cargarNotificaciones();
-                    actualizarContador();
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    // Marcar todas como leídas
-    function marcarTodasComoLeidas() {
-        fetch('{{ route("notificaciones.marcar.todas.leidas") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    cargarNotificaciones();
-                    actualizarContador();
-                }
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    // Actualizar contador
-    function actualizarContador() {
-        fetch('{{ route("notificaciones.contador") }}')
-            .then(response => response.json())
-            .then(data => {
-                const countBadge = document.getElementById('notificacionesCount');
-                if (countBadge) countBadge.textContent = data.count;
-            })
-            .catch(error => console.error('Error:', error));
-    }
-
-    // Inicializar cuando el DOM esté listo
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('DOM cargado, iniciando notificaciones...');
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
         cargarNotificaciones();
-        // Actualizar cada 30 segundos
-        setInterval(cargarNotificaciones, 30000);
+        actualizarContador();
+        setInterval(() => {
+            cargarNotificaciones();
+            actualizarContador();
+        }, 30000);
     });
 </script>
 
