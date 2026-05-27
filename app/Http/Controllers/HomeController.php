@@ -280,17 +280,17 @@ public function planificacionActividad($submenu_nombre, $id_sub_menu)
 
     // Determinar qué vista mostrar según el submenu_nombre
     switch($submenu_nombre) {
-        case 'certificacion_actividad':
-            $vista = 'sections.planificacion.certificacionActividad';
+        case 'graficos':
+            $vista = 'sections.planificacion.graficos';
             break;
-        case 'reporte_semanal':
-            $vista = 'sections.planificacion.reporte_semanal';
+        case 'estadisticas':
+            $vista = 'sections.planificacion.estadisticas';
             break;
-        case 'configuracion':
-            $vista = 'sections.planificacion.configuracion';
+        case 'reportes':
+            $vista = 'sections.planificacion.reportes';
             break;
         default:
-            $vista = 'sections.planificacionActividad';
+            $vista = 'home.home';
             break;
     }
 
